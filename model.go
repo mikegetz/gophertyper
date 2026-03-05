@@ -52,7 +52,8 @@ type gopher struct {
 }
 
 type keyMap struct {
-	Quit key.Binding
+	Quit    key.Binding
+	Letters [26]key.Binding
 }
 
 var keys = keyMap{
@@ -60,6 +61,14 @@ var keys = keyMap{
 		key.WithKeys("ctrl+c", "esc"),
 		key.WithHelp("ctrl+c/esc", "quit"),
 	),
+	Letters: func() [26]key.Binding {
+		var bindings [26]key.Binding
+		for i := 0; i < 26; i++ {
+			letter := string(rune('a' + i))
+			bindings[i] = key.NewBinding(key.WithKeys(letter))
+		}
+		return bindings
+	}(),
 }
 
 func initialModel() model {
