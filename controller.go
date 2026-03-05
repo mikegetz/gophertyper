@@ -16,10 +16,9 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.height = msg.Height
 
 	case tickMsg:
-		for i, gopher := range m.gophers {
-			if gopher.Y > 0 {
-				m.gophers[i].Y--
-			}
+		randomGopher := rand.Intn(len(m.gophers))
+		if m.gophers[randomGopher].Y > 0 {
+			m.gophers[randomGopher].Y--
 		}
 		return m, moveGophers(time.Millisecond * 250)
 
@@ -40,8 +39,9 @@ func initGophers(m *model) {
 	gopherCount := 10
 
 	if m.height > 0 && len(m.gophers) == 0 {
+		segmentWidth := m.width / gopherCount
 		for i := 0; i < gopherCount; i++ {
-			gopherSpacing := 5 + rand.Intn(20-5)
+			gopherSpacing := (i * segmentWidth) + rand.Intn(segmentWidth)
 			m.gophers = append(m.gophers, gopher{X: gopherSpacing, Y: (m.height - m.topPadding), Word: easyWordList[rand.Intn(len(easyWordList))]})
 		}
 	}
