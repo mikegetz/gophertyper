@@ -1,6 +1,7 @@
 package main
 
 import (
+	"math/rand"
 	"time"
 
 	"charm.land/bubbles/v2/key"
@@ -20,7 +21,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.gophers[i].Y--
 			}
 		}
-		return m, moveGophers(3 * time.Second)
+		return m, moveGophers(time.Millisecond * 250)
 
 	case tea.KeyPressMsg:
 		switch {
@@ -30,13 +31,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	}
 
-	if m.height > 0 && len(m.gophers) == 0 {
-		m.gophers = []gopher{
-			{X: 5, Y: m.height - 2},
-			{X: 8, Y: m.height - 2},
-			{X: 11, Y: m.height - 2},
-		}
-	}
+	initGophers(&m)
 
 	return m, nil
+}
+
+func initGophers(m *model) {
+	gopherCount := 10
+
+	if m.height > 0 && len(m.gophers) == 0 {
+		for i := 0; i < gopherCount; i++ {
+			m.gophers = append(m.gophers, gopher{X: rand.Intn(10), Y: (m.height - m.topPadding)})
+		}
+	}
 }

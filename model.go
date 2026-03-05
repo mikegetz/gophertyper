@@ -11,8 +11,9 @@ type model struct {
 	gophers []gopher
 
 	// terminal dimensions
-	width  int
-	height int
+	width      int
+	height     int
+	topPadding int
 
 	keys keyMap
 }
@@ -34,14 +35,15 @@ var keys = keyMap{
 
 func initialModel() model {
 	model := model{
-		keys: keys,
+		keys:       keys,
+		topPadding: 7,
 	}
 
 	return model
 }
 
 func (m model) Init() tea.Cmd {
-	return tea.Batch(moveGophers(3 * time.Second))
+	return tea.Batch(moveGophers(time.Millisecond * 500))
 }
 
 type tickMsg time.Time
