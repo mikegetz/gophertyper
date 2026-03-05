@@ -25,9 +25,11 @@ var (
 )
 
 type model struct {
-	gophers []gopher
-	wave    int
-	lose    *gopher
+	gophers          []gopher
+	gophersFirstChar []rune
+	wave             int
+	lose             *gopher
+	selected         *gopher
 
 	// terminal dimensions
 	width      int

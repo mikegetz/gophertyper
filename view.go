@@ -11,6 +11,7 @@ import (
 
 var (
 	containerStyle    = lipgloss.NewStyle().Background(lipgloss.Color("#714209"))
+	selectedStyle     = lipgloss.NewStyle().Background(lipgloss.Color("#714209")).Foreground(lipgloss.Color("#13ce32")).Bold(true)
 	skyStyle          = lipgloss.NewStyle().Background(lipgloss.Color("#87a8eb")).Foreground(lipgloss.Black)
 	grassySkyStyle    = lipgloss.NewStyle().Background(lipgloss.Color("#009600")).Foreground(lipgloss.Color("#014a01"))
 	grassyGroundStyle = lipgloss.NewStyle().Background(lipgloss.Color("#714209")).Foreground(lipgloss.Color("#228B22"))
@@ -93,7 +94,11 @@ func (m model) printGophers() string {
 				var renderObject string
 				switch sortedGopher.Type {
 				case word:
-					renderObject = sortedGopher.Word
+					if m.selected != nil && sortedGopher.X == m.selected.X && sortedGopher.Y == m.selected.Y {
+						renderObject = selectedStyle.Render(sortedGopher.Word)
+					} else {
+						renderObject = sortedGopher.Word
+					}
 				case gopherIcon:
 					if m.lose != nil && sortedGopher.X == m.lose.X {
 						renderObject = gopherHoleStyle.Render("  ")
