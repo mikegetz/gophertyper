@@ -10,21 +10,25 @@ import (
 
 var (
 	containerStyle    = lipgloss.NewStyle().Background(lipgloss.Color("#714209"))
-	skyStyle          = lipgloss.NewStyle().Background(lipgloss.Color("#87a8eb"))
+	skyStyle          = lipgloss.NewStyle().Background(lipgloss.Color("#87a8eb")).Foreground(lipgloss.Black)
+	grassySkyStyle    = lipgloss.NewStyle().Background(lipgloss.Color("#87a8eb")).Foreground(lipgloss.Color("#228B22"))
 	grassyGroundStyle = lipgloss.NewStyle().Background(lipgloss.Color("#714209")).Foreground(lipgloss.Color("#228B22"))
+	gopherHoleStyle   = lipgloss.NewStyle().Background(lipgloss.Color("#422400"))
 )
 
 func (m model) View() tea.View {
 	screen := ""
+	grassyGround := "~~^~^~^~~^~~^~*~^~^~~^~^~~^~"
+	grassyGroundRepeats := (m.width / len(grassyGround)) + 1
 
+	screen += skyStyle.Width(m.width).Render("ctrl+c/esc to quit") + "\n"
 	sky := skyStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
-	for i := 0; i < m.topPadding; i++ {
+	skyLast := grassySkyStyle.Width(m.width).Render(strings.Repeat(grassyGround, grassyGroundRepeats)[:m.width]) + "\n"
+	for i := 1; i < m.topPadding-4; i++ {
 		screen += sky
 	}
 
-	grassyGround := "~~^~^~^~~^~~^~*~^~^~~^~^~~^~"
-
-	grassyGroundRepeats := (m.width / len(grassyGround)) + 1
+	screen += skyLast
 
 	ground := grassyGroundStyle.Width(m.width).Render(strings.Repeat(grassyGround, grassyGroundRepeats)[:m.width]) + "\n"
 
@@ -42,7 +46,7 @@ func (m model) View() tea.View {
 				screen += containerStyle.Render(strings.Repeat(" ", gopher.X) + "🐹")
 			}
 			if gopher.Y < y {
-				screen += containerStyle.Render(strings.Repeat(" ", gopher.X) + "||")
+				screen += containerStyle.Render(strings.Repeat(" ", gopher.X) + gopherHoleStyle.Render("  "))
 			}
 		}
 		screen += containerStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
