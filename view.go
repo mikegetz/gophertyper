@@ -11,7 +11,7 @@ import (
 var (
 	containerStyle    = lipgloss.NewStyle().Background(lipgloss.Color("#714209"))
 	skyStyle          = lipgloss.NewStyle().Background(lipgloss.Color("#87a8eb")).Foreground(lipgloss.Black)
-	grassySkyStyle    = lipgloss.NewStyle().Background(lipgloss.Color("#87a8eb")).Foreground(lipgloss.Color("#228B22"))
+	grassySkyStyle    = lipgloss.NewStyle().Background(lipgloss.Color("#009600")).Foreground(lipgloss.Color("#014a01"))
 	grassyGroundStyle = lipgloss.NewStyle().Background(lipgloss.Color("#714209")).Foreground(lipgloss.Color("#228B22"))
 	gopherHoleStyle   = lipgloss.NewStyle().Background(lipgloss.Color("#422400"))
 )
@@ -23,7 +23,7 @@ func (m model) View() tea.View {
 
 	screen += skyStyle.Width(m.width).Render("ctrl+c/esc to quit") + "\n"
 	sky := skyStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
-	skyLast := grassySkyStyle.Width(m.width).Render(strings.Repeat(grassyGround, grassyGroundRepeats)[:m.width]) + "\n"
+	skyLast := grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
 	for i := 1; i < m.topPadding-4; i++ {
 		screen += sky
 	}

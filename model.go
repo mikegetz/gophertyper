@@ -54,7 +54,7 @@ var keys = keyMap{
 func initialModel() model {
 	model := model{
 		keys:       keys,
-		topPadding: 7,
+		topPadding: 8,
 	}
 
 	return model
