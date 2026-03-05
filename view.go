@@ -40,12 +40,10 @@ func (m model) View() tea.View {
 			if gopher.Y == y+1 {
 				gopher.Type = word
 				sortedLineGophers = append(sortedLineGophers, gopher)
-			}
-			if gopher.Y == y {
+			} else if gopher.Y == y {
 				gopher.Type = gopherIcon
 				sortedLineGophers = append(sortedLineGophers, gopher)
-			}
-			if gopher.Y < y {
+			} else if gopher.Y < y {
 				gopher.Type = gopherPath
 				sortedLineGophers = append(sortedLineGophers, gopher)
 			}
@@ -58,6 +56,7 @@ func (m model) View() tea.View {
 			var line string
 			lineOffset := 0
 			for _, sortedGopher := range sortedLineGophers {
+
 				var renderObject string
 				switch sortedGopher.Type {
 				case word:
@@ -67,12 +66,19 @@ func (m model) View() tea.View {
 				case gopherPath:
 					renderObject = gopherHoleStyle.Render("  ")
 				}
+
 				padding := sortedGopher.X - lineOffset
+
+				if sortedGopher.Type == word {
+					padding -= lipgloss.Width(renderObject) / 2
+				}
+
 				if padding < 0 {
 					padding = 0
 				}
-				line += strings.Repeat(" ", padding) + renderObject
-				lineOffset += padding + len(renderObject)
+
+				line += containerStyle.Render(strings.Repeat(" ", padding) + renderObject)
+				lineOffset += padding + lipgloss.Width(renderObject)
 			}
 			screen += containerStyle.Width(m.width).Render(line) + "\n"
 		} else {

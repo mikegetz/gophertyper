@@ -20,7 +20,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.gophers[randomGopher].Y > 0 {
 			m.gophers[randomGopher].Y--
 		}
-		return m, moveGophers(time.Millisecond * 250)
+		timeMultiplier := 100 - m.wave
+		return m, moveGophers(time.Millisecond * time.Duration(timeMultiplier))
 
 	case tea.KeyPressMsg:
 		switch {
@@ -41,7 +42,10 @@ func initGophers(m *model) {
 	if m.height > 0 && len(m.gophers) == 0 {
 		segmentWidth := m.width / gopherCount
 		for i := 0; i < gopherCount; i++ {
-			gopherSpacing := (i * segmentWidth) + rand.Intn(segmentWidth)
+			segmentStart := i * segmentWidth                                       // left edge of this gopher's segment
+			segmentMargin := 1                                                     // columns reserved on each side to prevent adjacency
+			usableWidth := segmentWidth - (segmentMargin * 2)                      // placeable range within the segment after margins
+			gopherSpacing := segmentStart + segmentMargin + rand.Intn(usableWidth) // final X: start + margin + random offset
 			m.gophers = append(m.gophers, gopher{X: gopherSpacing, Y: (m.height - m.topPadding), Word: easyWordList[rand.Intn(len(easyWordList))]})
 		}
 	}

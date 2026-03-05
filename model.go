@@ -26,6 +26,7 @@ var (
 
 type model struct {
 	gophers []gopher
+	wave    int
 
 	// terminal dimensions
 	width      int
