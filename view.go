@@ -9,21 +9,35 @@ import (
 )
 
 var (
-	containerStyle = lipgloss.NewStyle()
+	containerStyle    = lipgloss.NewStyle().Background(lipgloss.Color("#714209"))
+	skyStyle          = lipgloss.NewStyle().Background(lipgloss.Color("#87a8eb"))
+	grassyGroundStyle = lipgloss.NewStyle().Background(lipgloss.Color("#714209")).Foreground(lipgloss.Color("#228B22"))
 )
 
 func (m model) View() tea.View {
-	screen := strings.Repeat("\n", m.topPadding-1)
+	screen := ""
+
+	sky := skyStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
+	for i := 0; i < m.topPadding; i++ {
+		screen += sky
+	}
 
 	grassyGround := "~~^~^~^~~^~~^~*~^~^~~^~^~~^~"
 
 	grassyGroundRepeats := (m.width / len(grassyGround)) + 1
 
-	ground := containerStyle.Width(m.width).Render(strings.Repeat(grassyGround, grassyGroundRepeats)[:m.width]) + "\n"
+	ground := grassyGroundStyle.Width(m.width).Render(strings.Repeat(grassyGround, grassyGroundRepeats)[:m.width]) + "\n"
 
 	screen += ground
 	for y := 0; y < (m.height - m.topPadding); y++ {
 		for _, gopher := range m.gophers {
+			if gopher.Y == y+1 {
+				wordX := gopher.X - (len(gopher.Word) / 2)
+				if wordX < 0 {
+					wordX = 0
+				}
+				screen += containerStyle.Render(strings.Repeat(" ", wordX) + gopher.Word)
+			}
 			if gopher.Y == y {
 				screen += containerStyle.Render(strings.Repeat(" ", gopher.X) + "🐹")
 			}
@@ -31,7 +45,7 @@ func (m model) View() tea.View {
 				screen += containerStyle.Render(strings.Repeat(" ", gopher.X) + "||")
 			}
 		}
-		screen += "\n"
+		screen += containerStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
 	}
 
 	// add height to m.topPadding to account for the ground and the newlines above
