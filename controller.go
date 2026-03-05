@@ -17,10 +17,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tickMsg:
 		randomGopher := rand.Intn(len(m.gophers))
+		timeMultiplier := 10 - m.wave
+
 		if m.gophers[randomGopher].Y > 0 {
 			m.gophers[randomGopher].Y--
+		} else {
+			m.lose = &m.gophers[randomGopher]
+			return m, nil
 		}
-		timeMultiplier := 100 - m.wave
+
 		return m, moveGophers(time.Millisecond * time.Duration(timeMultiplier))
 
 	case tea.KeyPressMsg:
