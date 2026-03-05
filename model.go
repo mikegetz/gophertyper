@@ -27,6 +27,7 @@ var (
 type model struct {
 	gophers []gopher
 	wave    int
+	lose    *gopher
 
 	// terminal dimensions
 	width      int
@@ -65,6 +66,7 @@ func initialModel() model {
 	model := model{
 		keys:       keys,
 		topPadding: 8,
+		lose:       nil,
 	}
 
 	return model

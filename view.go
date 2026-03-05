@@ -19,21 +19,54 @@ var (
 
 func (m model) View() tea.View {
 	screen := ""
+	screen += m.printSky()
+
+	screen += m.printGophers()
+	// add height to m.topPadding to account for the ground and the newlines above
+	//screen += m.debugView()
+
+	teaView := tea.NewView(screen)
+	return teaView
+}
+
+func (m model) printSky() string {
+	screen := ""
 	grassyGround := "~~^~^~^~~^~~^~*~^~^~~^~^~~^~"
 	grassyGroundRepeats := (m.width / len(grassyGround)) + 1
 
 	screen += skyStyle.Width(m.width).Render("ctrl+c/esc to quit") + "\n"
 	sky := skyStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
-	skyLast := grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
+	var horizon string
+	if m.lose != nil {
+		horizon = grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", m.lose.X)+gopherHoleStyle.Render("🐹")) + "\n"
+	} else {
+		horizon = grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
+	}
 	for i := 1; i < m.topPadding-4; i++ {
-		screen += sky
+		if m.lose != nil && i == m.topPadding-5 {
+			loseText := "you lose to gopher "
+			padding := m.lose.X - len(loseText)
+			if padding < 0 {
+				padding = 0
+			}
+			screen += skyStyle.Width(m.width).Render(strings.Repeat(" ", padding)+loseText+m.lose.Word) + "\n"
+		} else {
+			screen += sky
+		}
 	}
 
-	screen += skyLast
+	screen += horizon
 
 	ground := grassyGroundStyle.Width(m.width).Render(strings.Repeat(grassyGround, grassyGroundRepeats)[:m.width]) + "\n"
 
 	screen += ground
+
+	return screen
+}
+
+func (m model) printGophers() string {
+	screen := ""
+
 	for y := 0; y < (m.height - m.topPadding); y++ {
 		sortedLineGophers := []gopher{}
 		for _, gopher := range m.gophers {
@@ -62,7 +95,11 @@ func (m model) View() tea.View {
 				case word:
 					renderObject = sortedGopher.Word
 				case gopherIcon:
-					renderObject = "🐹"
+					if m.lose != nil && sortedGopher.X == m.lose.X {
+						renderObject = gopherHoleStyle.Render("  ")
+					} else {
+						renderObject = "🐹"
+					}
 				case gopherPath:
 					renderObject = gopherHoleStyle.Render("  ")
 				}
@@ -86,11 +123,7 @@ func (m model) View() tea.View {
 		}
 	}
 
-	// add height to m.topPadding to account for the ground and the newlines above
-	//screen += m.debugView()
-
-	teaView := tea.NewView(screen)
-	return teaView
+	return screen
 }
 
 func (m model) debugView() string {
