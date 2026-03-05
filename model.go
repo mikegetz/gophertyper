@@ -26,6 +26,7 @@ var (
 
 type model struct {
 	gophers []gopher
+	wave    int
 
 	// terminal dimensions
 	width      int
@@ -35,9 +36,18 @@ type model struct {
 	keys keyMap
 }
 
+type gopherType int
+
+const (
+	word gopherType = iota
+	gopherIcon
+	gopherPath
+)
+
 type gopher struct {
 	X, Y int
 	Word string
+	Type gopherType
 }
 
 type keyMap struct {
