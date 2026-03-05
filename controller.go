@@ -41,7 +41,8 @@ func initGophers(m *model) {
 
 	if m.height > 0 && len(m.gophers) == 0 {
 		for i := 0; i < gopherCount; i++ {
-			m.gophers = append(m.gophers, gopher{X: rand.Intn(10), Y: (m.height - m.topPadding)})
+			gopherSpacing := 5 + rand.Intn(20-5)
+			m.gophers = append(m.gophers, gopher{X: gopherSpacing, Y: (m.height - m.topPadding), Word: easyWordList[rand.Intn(len(easyWordList))]})
 		}
 	}
 }

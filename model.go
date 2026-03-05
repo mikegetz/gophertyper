@@ -1,10 +1,27 @@
 package main
 
 import (
+	_ "embed"
+	"strings"
 	"time"
 
 	"charm.land/bubbles/v2/key"
 	tea "charm.land/bubbletea/v2"
+)
+
+//go:embed words/easy.txt
+var easyWords string
+
+//go:embed words/medium.txt
+var mediumWords string
+
+//go:embed words/hard.txt
+var hardWords string
+
+var (
+	easyWordList   = strings.Split(easyWords, "\n")
+	mediumWordList = strings.Split(mediumWords, "\n")
+	hardWordList   = strings.Split(hardWords, "\n")
 )
 
 type model struct {
@@ -20,6 +37,7 @@ type model struct {
 
 type gopher struct {
 	X, Y int
+	Word string
 }
 
 type keyMap struct {
@@ -36,7 +54,7 @@ var keys = keyMap{
 func initialModel() model {
 	model := model{
 		keys:       keys,
-		topPadding: 7,
+		topPadding: 8,
 	}
 
 	return model
