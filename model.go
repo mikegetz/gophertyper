@@ -10,6 +10,8 @@ import (
 	tea "charm.land/bubbletea/v2"
 )
 
+const minTerminalWidth = 100
+
 //go:embed words/easy.txt
 var easyWords string
 
@@ -18,6 +20,44 @@ var mediumWords string
 
 //go:embed words/hard.txt
 var hardWords string
+
+//go:embed words/win
+var winText string
+
+//go:embed words/wave
+var wave string
+
+//go:embed words/0
+var waveZero string
+
+//go:embed words/1
+var waveOne string
+
+//go:embed words/2
+var waveTwo string
+
+//go:embed words/3
+var waveThree string
+
+//go:embed words/4
+var waveFour string
+
+//go:embed words/5
+var waveFive string
+
+//go:embed words/6
+var waveSix string
+
+//go:embed words/7
+var waveSeven string
+
+//go:embed words/8
+var waveEight string
+
+//go:embed words/9
+var waveNine string
+
+var waveNumbers = []string{waveZero, waveOne, waveTwo, waveThree, waveFour, waveFive, waveSix, waveSeven, waveEight, waveNine}
 
 var (
 	easyWordList   = strings.Split(easyWords, "\n")
@@ -29,24 +69,31 @@ type model struct {
 	gophers          []gopher
 	gophersFirstChar []rune
 	wave             int
+	waveTransition   bool
+	winTransition    bool
+	timeMultiplier   int
 	lose             *gopher
 	win              *gopher
 	selected         *gopher
 
 	// terminal dimensions
-	width      int
-	height     int
-	topPadding int
+	width         int
+	height        int
+	topPadding    int
+	resizeWarning bool
 
 	keys keyMap
 }
 
 func initialModel() model {
 	model := model{
-		keys:       keys,
-		topPadding: 8,
-		lose:       nil,
-		win:        nil,
+		keys:           keys,
+		topPadding:     10,
+		lose:           nil,
+		win:            nil,
+		waveTransition: false,
+		winTransition:  false,
+		wave:           0,
 	}
 
 	return model
@@ -124,11 +171,29 @@ var keys = keyMap{
 
 type tickMsg time.Time
 
-type clockTickMsg struct{}
+type waveTransitionMsg struct{}
 
-func clockTick() tea.Cmd {
-	return tea.Tick(time.Second, func(time.Time) tea.Msg {
-		return clockTickMsg{}
+type winTransitionMsg struct{}
+
+type loseTransitionMsg struct{}
+
+func waveTransition(m *model, d time.Duration) tea.Cmd {
+	m.waveTransition = true
+	return tea.Tick(d, func(time.Time) tea.Msg {
+		return waveTransitionMsg{}
+	})
+}
+
+func winTransition(m *model, d time.Duration) tea.Cmd {
+	m.winTransition = true
+	return tea.Tick(d, func(time.Time) tea.Msg {
+		return winTransitionMsg{}
+	})
+}
+
+func loseTransition(m *model, d time.Duration) tea.Cmd {
+	return tea.Tick(d, func(time.Time) tea.Msg {
+		return loseTransitionMsg{}
 	})
 }
 

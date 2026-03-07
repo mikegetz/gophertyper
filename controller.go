@@ -10,25 +10,53 @@ import (
 )
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	m.timeMultiplier = (50 - m.wave) + ((10 - m.LivingGopherCount()) * 15)
 	switch msg := msg.(type) {
 
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
+		if msg.Width < minTerminalWidth {
+			m.resizeWarning = true
+			return m, nil
+		} else {
+			m.resizeWarning = false
+			return m, moveGophers(time.Millisecond * time.Duration(m.timeMultiplier))
+		}
+
+	case winTransitionMsg:
+		return m, tea.Quit
+
+	case loseTransitionMsg:
+		return m, tea.Quit
+
+	case waveTransitionMsg:
+		m.waveTransition = false
+		m.wave++
+		m.clearGophers()
+		m.initGophers()
+		return m, moveGophers(time.Millisecond * time.Duration(m.timeMultiplier))
 
 	case tickMsg:
+		if m.resizeWarning || m.win != nil || m.lose != nil {
+			return m, nil
+		}
+
 		randomGopher := m.RandomLivingGopher()
-		timeMultiplier := 50 - m.wave + ((10 - m.LivingGopherCount()) * 5)
 
 		if randomGopher == nil {
-			return m, nil
+			if m.wave > 9 {
+				m.win = m.selected
+				return m, winTransition(&m, time.Second*5)
+			}
+			return m, waveTransition(&m, time.Second*3)
 		}
 
 		if randomGopher.Y > 0 {
 			randomGopher.Y--
 		} else {
 			m.lose = randomGopher
-			return m, nil
+			return m, loseTransition(&m, time.Second*15)
 		}
 
 		if m.selected != nil {
@@ -38,7 +66,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 
-		return m, moveGophers(time.Millisecond * time.Duration(timeMultiplier))
+		return m, moveGophers(time.Millisecond * time.Duration(m.timeMultiplier))
 
 	case tea.KeyPressMsg:
 		if key.Matches(msg, m.keys.Quit) {
@@ -70,6 +98,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.initGophers()
 
 	return m, nil
+}
+
+func (m *model) clearGophers() {
+	m.gophers = make([]gopher, 0)
+	m.gophersFirstChar = make([]rune, 0)
+	m.selected = nil
 }
 
 func (m *model) initGophers() {

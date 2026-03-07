@@ -11,7 +11,9 @@ import (
 
 var (
 	containerStyle            = lipgloss.NewStyle().Background(lipgloss.Color("#714209"))
-	gopherHoleSelectedStyle   = lipgloss.NewStyle().Background(lipgloss.Color("#422400")).Foreground(lipgloss.Color("#13ce32")).Bold(true)
+	transitionContainerStyle  = lipgloss.NewStyle().Background(lipgloss.Color("#422400"))
+	waveTransitionTextStyle   = lipgloss.NewStyle().Background(lipgloss.Color("#422400")).Foreground(lipgloss.Color("#d2d201")).Bold(true)
+	gopherHoleSelectedStyle   = lipgloss.NewStyle().Background(lipgloss.Color("#422400")).Foreground(lipgloss.Color("#d2d201")).Bold(true)
 	skyStyle                  = lipgloss.NewStyle().Background(lipgloss.Color("#87a8eb")).Foreground(lipgloss.Black)
 	grassySkyStyle            = lipgloss.NewStyle().Background(lipgloss.Color("#009600")).Foreground(lipgloss.Color("#014a01"))
 	grassyGroundStyle         = lipgloss.NewStyle().Background(lipgloss.Color("#714209")).Foreground(lipgloss.Color("#228B22"))
@@ -22,9 +24,18 @@ func (m model) View() tea.View {
 	screen := ""
 	screen += m.printSky()
 
-	screen += m.printGophers()
+	if m.resizeWarning {
+		screen += m.printResizeWarning()
+	} else if m.waveTransition {
+		screen += m.printWaveTransition()
+	} else if m.winTransition {
+		screen += m.printWinTransition()
+	} else {
+		screen += m.printGophers()
+	}
+
 	// add height to m.topPadding to account for the ground and the newlines above
-	//screen += m.debugView()
+	screen += m.debugView()
 
 	teaView := tea.NewView(screen)
 	return teaView
@@ -65,10 +76,83 @@ func (m model) printSky() string {
 	return screen
 }
 
+func (m model) printWinTransition() string {
+	screen := ""
+	winVerticalPadding := 4
+	gameViewSize := m.height - m.topPadding
+
+	for y := 0; y < winVerticalPadding; y++ {
+		screen += transitionContainerStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
+	}
+
+	screen += waveTransitionTextStyle.Width(m.width).Align(lipgloss.Center).Render(winText) + "\n"
+
+	for y := 0; y < gameViewSize-(winVerticalPadding+lipgloss.Height(wave)); y++ {
+		screen += transitionContainerStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
+	}
+
+	return screen
+}
+
+func (m model) printResizeWarning() string {
+	screen := ""
+	verticalPadding := 4
+	gameViewSize := m.height - m.topPadding
+
+	for y := 0; y < verticalPadding; y++ {
+		screen += containerStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
+	}
+
+	warning := "RESIZE TERMINAL to Minimum Width: " + fmt.Sprint(minTerminalWidth)
+	screen += containerStyle.Width(m.width).Align(lipgloss.Center).Render(warning) + "\n"
+
+	for y := 0; y < (gameViewSize - (verticalPadding + 1)); y++ {
+		screen += containerStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
+	}
+
+	return screen
+}
+
+func (m model) printWaveTransition() string {
+	screen := ""
+	verticalPadding := 4
+	gameViewSize := m.height - m.topPadding
+
+	for y := 0; y < verticalPadding; y++ {
+		screen += transitionContainerStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
+	}
+
+	screen += waveTransitionTextStyle.Width(m.width).Align(lipgloss.Center).Render(concatArt(wave, waveNumbers[m.wave])) + "\n"
+
+	for y := 0; y < gameViewSize-(verticalPadding+lipgloss.Height(wave)); y++ {
+		screen += transitionContainerStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
+	}
+
+	return screen
+}
+
+func concatArt(left, right string) string {
+	leftLines := strings.Split(left, "\n")
+	rightLines := strings.Split(right, "\n")
+	var result []string
+	for i := 0; i < max(len(leftLines), len(rightLines)); i++ {
+		l, r := "", ""
+		if i < len(leftLines) {
+			l = leftLines[i]
+		}
+		if i < len(rightLines) {
+			r = rightLines[i]
+		}
+		result = append(result, l+r)
+	}
+	return strings.Join(result, "\n")
+}
+
 func (m model) printGophers() string {
+	gameViewSize := m.height - m.topPadding
 	screen := ""
 
-	for y := 0; y < (m.height - m.topPadding); y++ {
+	for y := 0; y < gameViewSize; y++ {
 		sortedLineGophers := []gopher{}
 		for _, gopher := range m.gophers {
 			if gopher.Y == y {
@@ -96,8 +180,7 @@ func (m model) printGophers() string {
 				case gopherIcon:
 					if m.lose != nil && sortedGopher.X == m.lose.X {
 						renderObject = gopherHoleStyle.Render("  ")
-					}
-					if sortedGopher.Alive == false {
+					} else if sortedGopher.Alive == false {
 						renderObject = "💀"
 					} else {
 						renderObject = "🐹"
@@ -129,9 +212,11 @@ func (m model) printGophers() string {
 }
 
 func (m model) debugView() string {
-	debug := "[DEBUG] "
+	debug := "[DEBUG]"
 
-	debug += fmt.Sprintf("Terminal Size: %d x %d", m.width, m.height)
-	debug += " Gophers: " + fmt.Sprint(m.gophers)
+	//debug += fmt.Sprintf("Terminal Size: %d x %d", m.width, m.height)
+	//debug += " Gophers: " + fmt.Sprint(m.gophers)
+	//debug += fmt.Sprintf(" lose: %v", m.lose)
+	debug += fmt.Sprintf(" timeMultiplier: %d", m.timeMultiplier)
 	return debug
 }
