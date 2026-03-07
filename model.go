@@ -69,11 +69,20 @@ func (m model) RandomLivingGopher() *gopher {
 	return living[rand.IntN(len(living))]
 }
 
+func (m model) LivingGopherCount() int {
+	count := 0
+	for _, gopher := range m.gophers {
+		if gopher.Alive {
+			count++
+		}
+	}
+	return count
+}
+
 type gopherType int
 
 const (
-	word gopherType = iota
-	gopherIcon
+	gopherIcon gopherType = iota
 	gopherPath
 )
 
