@@ -95,13 +95,16 @@ func (m model) printGophers() string {
 				switch sortedGopher.Type {
 				case word:
 					if m.selected != nil && sortedGopher.X == m.selected.X && sortedGopher.Y == m.selected.Y {
-						renderObject = selectedStyle.Render(sortedGopher.Word)
+						renderObject = selectedStyle.Render(sortedGopher.DisplayWord)
 					} else {
-						renderObject = sortedGopher.Word
+						renderObject = sortedGopher.DisplayWord
 					}
 				case gopherIcon:
 					if m.lose != nil && sortedGopher.X == m.lose.X {
 						renderObject = gopherHoleStyle.Render("  ")
+					}
+					if sortedGopher.Alive == false {
+						renderObject = "💀"
 					} else {
 						renderObject = "🐹"
 					}
@@ -112,7 +115,7 @@ func (m model) printGophers() string {
 				padding := sortedGopher.X - lineOffset
 
 				if sortedGopher.Type == word {
-					padding -= lipgloss.Width(renderObject) / 2
+					padding -= lipgloss.Width(sortedGopher.Word) / 2
 				}
 
 				if padding < 0 {

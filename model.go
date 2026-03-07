@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"math/rand/v2"
 	"strings"
 	"time"
 
@@ -29,6 +30,7 @@ type model struct {
 	gophersFirstChar []rune
 	wave             int
 	lose             *gopher
+	win              *gopher
 	selected         *gopher
 
 	// terminal dimensions
@@ -37,6 +39,34 @@ type model struct {
 	topPadding int
 
 	keys keyMap
+}
+
+func initialModel() model {
+	model := model{
+		keys:       keys,
+		topPadding: 8,
+		lose:       nil,
+		win:        nil,
+	}
+
+	return model
+}
+
+func (m model) Init() tea.Cmd {
+	return tea.Batch(moveGophers(time.Millisecond * 500))
+}
+
+func (m model) RandomLivingGopher() *gopher {
+	var living []*gopher
+	for i := range m.gophers {
+		if m.gophers[i].Alive {
+			living = append(living, &m.gophers[i])
+		}
+	}
+	if len(living) == 0 {
+		return nil
+	}
+	return living[rand.IntN(len(living))]
 }
 
 type gopherType int
@@ -48,9 +78,19 @@ const (
 )
 
 type gopher struct {
-	X, Y int
-	Word string
-	Type gopherType
+	X, Y        int
+	Word        string
+	DisplayWord string
+	Type        gopherType
+	Alive       bool
+}
+
+func (g gopher) WordRunes() []rune {
+	return []rune(g.Word)
+}
+
+func (g gopher) DisplayWordRunes() []rune {
+	return []rune(g.DisplayWord)
 }
 
 type keyMap struct {
@@ -71,20 +111,6 @@ var keys = keyMap{
 		}
 		return bindings
 	}(),
-}
-
-func initialModel() model {
-	model := model{
-		keys:       keys,
-		topPadding: 8,
-		lose:       nil,
-	}
-
-	return model
-}
-
-func (m model) Init() tea.Cmd {
-	return tea.Batch(moveGophers(time.Millisecond * 500))
 }
 
 type tickMsg time.Time
