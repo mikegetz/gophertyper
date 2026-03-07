@@ -72,8 +72,7 @@ func (m model) RandomLivingGopher() *gopher {
 type gopherType int
 
 const (
-	word gopherType = iota
-	gopherIcon
+	gopherIcon gopherType = iota
 	gopherPath
 )
 

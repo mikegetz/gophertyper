@@ -10,12 +10,12 @@ import (
 )
 
 var (
-	containerStyle    = lipgloss.NewStyle().Background(lipgloss.Color("#714209"))
-	selectedStyle     = lipgloss.NewStyle().Background(lipgloss.Color("#714209")).Foreground(lipgloss.Color("#13ce32")).Bold(true)
-	skyStyle          = lipgloss.NewStyle().Background(lipgloss.Color("#87a8eb")).Foreground(lipgloss.Black)
-	grassySkyStyle    = lipgloss.NewStyle().Background(lipgloss.Color("#009600")).Foreground(lipgloss.Color("#014a01"))
-	grassyGroundStyle = lipgloss.NewStyle().Background(lipgloss.Color("#714209")).Foreground(lipgloss.Color("#228B22"))
-	gopherHoleStyle   = lipgloss.NewStyle().Background(lipgloss.Color("#422400"))
+	containerStyle            = lipgloss.NewStyle().Background(lipgloss.Color("#714209"))
+	gopherHoleSelectedStyle   = lipgloss.NewStyle().Background(lipgloss.Color("#422400")).Foreground(lipgloss.Color("#13ce32")).Bold(true)
+	skyStyle                  = lipgloss.NewStyle().Background(lipgloss.Color("#87a8eb")).Foreground(lipgloss.Black)
+	grassySkyStyle            = lipgloss.NewStyle().Background(lipgloss.Color("#009600")).Foreground(lipgloss.Color("#014a01"))
+	grassyGroundStyle         = lipgloss.NewStyle().Background(lipgloss.Color("#714209")).Foreground(lipgloss.Color("#228B22"))
+	gopherHoleUnselectedStyle = lipgloss.NewStyle().Background(lipgloss.Color("#4e2a00"))
 )
 
 func (m model) View() tea.View {
@@ -39,7 +39,7 @@ func (m model) printSky() string {
 	sky := skyStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
 	var horizon string
 	if m.lose != nil {
-		horizon = grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", m.lose.X)+gopherHoleStyle.Render("🐹")) + "\n"
+		horizon = grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", m.lose.X)+gopherHoleUnselectedStyle.Render("🐹")) + "\n"
 	} else {
 		horizon = grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
 	}
@@ -71,10 +71,7 @@ func (m model) printGophers() string {
 	for y := 0; y < (m.height - m.topPadding); y++ {
 		sortedLineGophers := []gopher{}
 		for _, gopher := range m.gophers {
-			if gopher.Y == y+1 {
-				gopher.Type = word
-				sortedLineGophers = append(sortedLineGophers, gopher)
-			} else if gopher.Y == y {
+			if gopher.Y == y {
 				gopher.Type = gopherIcon
 				sortedLineGophers = append(sortedLineGophers, gopher)
 			} else if gopher.Y < y {
@@ -90,15 +87,12 @@ func (m model) printGophers() string {
 			var line string
 			lineOffset := 0
 			for _, sortedGopher := range sortedLineGophers {
-
+				gopherHoleStyle := gopherHoleUnselectedStyle
+				if m.selected != nil && sortedGopher.X == m.selected.X {
+					gopherHoleStyle = gopherHoleSelectedStyle
+				}
 				var renderObject string
 				switch sortedGopher.Type {
-				case word:
-					if m.selected != nil && sortedGopher.X == m.selected.X && sortedGopher.Y == m.selected.Y {
-						renderObject = selectedStyle.Render(sortedGopher.DisplayWord)
-					} else {
-						renderObject = sortedGopher.DisplayWord
-					}
 				case gopherIcon:
 					if m.lose != nil && sortedGopher.X == m.lose.X {
 						renderObject = gopherHoleStyle.Render("  ")
@@ -109,14 +103,14 @@ func (m model) printGophers() string {
 						renderObject = "🐹"
 					}
 				case gopherPath:
-					renderObject = gopherHoleStyle.Render("  ")
+					if (y - sortedGopher.Y) <= len(sortedGopher.DisplayWord) {
+						renderObject = gopherHoleStyle.Render(string(sortedGopher.DisplayWordRunes()[(y-sortedGopher.Y)-1]) + " ")
+					} else {
+						renderObject = gopherHoleStyle.Render("  ")
+					}
 				}
 
 				padding := sortedGopher.X - lineOffset
-
-				if sortedGopher.Type == word {
-					padding -= lipgloss.Width(sortedGopher.Word) / 2
-				}
 
 				if padding < 0 {
 					padding = 0
