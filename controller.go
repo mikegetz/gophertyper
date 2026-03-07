@@ -18,7 +18,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 	case tickMsg:
 		randomGopher := m.RandomLivingGopher()
-		timeMultiplier := 50 - m.wave
+		timeMultiplier := 50 - m.wave + ((10 - m.LivingGopherCount()) * 5)
 
 		if randomGopher == nil {
 			return m, nil
