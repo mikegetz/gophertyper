@@ -2,6 +2,7 @@ package main
 
 import (
 	_ "embed"
+	"math/rand/v2"
 	"strings"
 	"time"
 
@@ -25,9 +26,12 @@ var (
 )
 
 type model struct {
-	gophers []gopher
-	wave    int
-	lose    *gopher
+	gophers          []gopher
+	gophersFirstChar []rune
+	wave             int
+	lose             *gopher
+	win              *gopher
+	selected         *gopher
 
 	// terminal dimensions
 	width      int
@@ -35,6 +39,34 @@ type model struct {
 	topPadding int
 
 	keys keyMap
+}
+
+func initialModel() model {
+	model := model{
+		keys:       keys,
+		topPadding: 8,
+		lose:       nil,
+		win:        nil,
+	}
+
+	return model
+}
+
+func (m model) Init() tea.Cmd {
+	return tea.Batch(moveGophers(time.Millisecond * 500))
+}
+
+func (m model) RandomLivingGopher() *gopher {
+	var living []*gopher
+	for i := range m.gophers {
+		if m.gophers[i].Alive {
+			living = append(living, &m.gophers[i])
+		}
+	}
+	if len(living) == 0 {
+		return nil
+	}
+	return living[rand.IntN(len(living))]
 }
 
 type gopherType int
@@ -46,13 +78,24 @@ const (
 )
 
 type gopher struct {
-	X, Y int
-	Word string
-	Type gopherType
+	X, Y        int
+	Word        string
+	DisplayWord string
+	Type        gopherType
+	Alive       bool
+}
+
+func (g gopher) WordRunes() []rune {
+	return []rune(g.Word)
+}
+
+func (g gopher) DisplayWordRunes() []rune {
+	return []rune(g.DisplayWord)
 }
 
 type keyMap struct {
-	Quit key.Binding
+	Quit    key.Binding
+	Letters [26]key.Binding
 }
 
 var keys = keyMap{
@@ -60,20 +103,14 @@ var keys = keyMap{
 		key.WithKeys("ctrl+c", "esc"),
 		key.WithHelp("ctrl+c/esc", "quit"),
 	),
-}
-
-func initialModel() model {
-	model := model{
-		keys:       keys,
-		topPadding: 8,
-		lose:       nil,
-	}
-
-	return model
-}
-
-func (m model) Init() tea.Cmd {
-	return tea.Batch(moveGophers(time.Millisecond * 500))
+	Letters: func() [26]key.Binding {
+		var bindings [26]key.Binding
+		for i := 0; i < 26; i++ {
+			letter := string(rune('a' + i))
+			bindings[i] = key.NewBinding(key.WithKeys(letter))
+		}
+		return bindings
+	}(),
 }
 
 type tickMsg time.Time
