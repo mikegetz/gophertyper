@@ -17,7 +17,7 @@ var (
 	skyStyle                  = lipgloss.NewStyle().Background(lipgloss.Color("#87a8eb")).Foreground(lipgloss.Black)
 	grassySkyStyle            = lipgloss.NewStyle().Background(lipgloss.Color("#009600")).Foreground(lipgloss.Color("#014a01"))
 	grassyGroundStyle         = lipgloss.NewStyle().Background(lipgloss.Color("#4e2a00")).Foreground(lipgloss.Color("#228B22"))
-	gopherHoleUnselectedStyle = lipgloss.NewStyle().Background(lipgloss.Color("#4e2a00"))
+	gopherHoleUnselectedStyle = lipgloss.NewStyle().Background(lipgloss.Color("#4e2a00")).Foreground(lipgloss.Color("#ffffff"))
 )
 
 func (m model) View() tea.View {
