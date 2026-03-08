@@ -10,7 +10,7 @@ import (
 )
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	waveMultiplier := 70 - m.wave
+	waveMultiplier := 50 - m.wave
 	livingGopherMultiplier := (10 - m.LivingGopherCount()) * 15
 	terminalHeightMultiplier := func() int {
 		if m.height > 40 {
