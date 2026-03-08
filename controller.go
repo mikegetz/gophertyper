@@ -106,7 +106,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
-		if m.win == nil && m.lose == nil && !m.resizeWidthWarning && !m.pause {
+		if m.win == nil && m.lose == nil && !m.resizeWidthWarning && !m.resizeHeightWarning && !m.pause {
 			for i, binding := range m.keys.Letters {
 				if !key.Matches(msg, binding) {
 					continue
