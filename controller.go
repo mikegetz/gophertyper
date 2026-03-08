@@ -10,7 +10,7 @@ import (
 )
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	waveMultiplier := 70 - m.wave
+	waveMultiplier := 50 - m.wave
 	livingGopherMultiplier := (10 - m.LivingGopherCount()) * 15
 	terminalHeightMultiplier := func() int {
 		if m.height > 40 {
@@ -27,9 +27,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.Width < minTerminalWidth {
 			m.resizeWarning = true
 			return m, nil
-		} else {
+		} else if m.resizeWarning {
 			m.resizeWarning = false
 			return m, moveGophers(time.Millisecond * time.Duration(m.timeMultiplier))
+		} else {
+			return m, nil
 		}
 
 	case winTransitionMsg:
@@ -46,7 +48,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, moveGophers(time.Millisecond * time.Duration(m.timeMultiplier))
 
 	case tickMsg:
-		if m.resizeWarning || m.win != nil || m.lose != nil {
+		if m.resizeWarning || m.win != nil || m.lose != nil || m.pause {
 			return m, nil
 		}
 
@@ -81,7 +83,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 
-		if m.win == nil && m.lose == nil && !m.resizeWarning {
+		if key.Matches(msg, m.keys.Pause) {
+			m.pause = !m.pause
+
+			if !m.pause {
+				return m, moveGophers(time.Millisecond * time.Duration(m.timeMultiplier))
+			}
+			return m, nil
+		}
+
+		if m.win == nil && m.lose == nil && !m.resizeWarning && !m.pause {
 			for i, binding := range m.keys.Letters {
 				if !key.Matches(msg, binding) {
 					continue
