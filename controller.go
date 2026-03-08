@@ -27,9 +27,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if msg.Width < minTerminalWidth {
 			m.resizeWarning = true
 			return m, nil
-		} else {
+		} else if m.resizeWarning {
 			m.resizeWarning = false
 			return m, moveGophers(time.Millisecond * time.Duration(m.timeMultiplier))
+		} else {
+			return m, nil
 		}
 
 	case winTransitionMsg:
