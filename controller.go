@@ -146,11 +146,9 @@ func (m *model) initGophers() {
 
 func (m *model) pickUniqueWords(n int) []string {
 	var wordList []string
-	if m.wave <= 3 {
-		wordList = append(wordList, easyWordList...)
-	}
+	wordList = append(wordList, easyWordList...)
 
-	if m.wave > 3 && m.wave <= 7 {
+	if m.wave > 3 {
 		wordList = append(wordList, mediumWordList...)
 	}
 
