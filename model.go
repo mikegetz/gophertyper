@@ -71,6 +71,7 @@ type model struct {
 	wave             int
 	waveTransition   bool
 	winTransition    bool
+	loseTransition   bool
 	timeMultiplier   int
 	pause            bool
 	lose             *gopher
@@ -83,18 +84,35 @@ type model struct {
 	topPadding    int
 	resizeWarning bool
 
+	// stats
+	correctKeypresses int
+	keypresses        int
+	killCount         int
+	gpm               string
+	gpmStart          time.Time
+	gpmEnd            time.Time
+	pauseStart        time.Time
+	pauseEnd          time.Time
+	pauseDuration     time.Duration
+	accuracy          string
+
 	keys keyMap
 }
 
 func initialModel() model {
 	model := model{
-		keys:           keys,
-		topPadding:     10,
-		lose:           nil,
-		win:            nil,
-		waveTransition: false,
-		winTransition:  false,
-		wave:           0,
+		keys:              keys,
+		topPadding:        10,
+		lose:              nil,
+		win:               nil,
+		waveTransition:    false,
+		winTransition:     false,
+		wave:              0,
+		killCount:         0,
+		correctKeypresses: 0,
+		gpm:               "0",
+		accuracy:          "0%",
+		keypresses:        0,
 	}
 
 	return model
@@ -198,6 +216,7 @@ func winTransition(m *model, d time.Duration) tea.Cmd {
 }
 
 func loseTransition(m *model, d time.Duration) tea.Cmd {
+	m.loseTransition = true
 	return tea.Tick(d, func(time.Time) tea.Msg {
 		return loseTransitionMsg{}
 	})

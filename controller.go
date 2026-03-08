@@ -3,6 +3,7 @@ package main
 import (
 	"math/rand/v2"
 	"slices"
+	"strconv"
 	"time"
 
 	"charm.land/bubbles/v2/key"
@@ -51,12 +52,16 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.resizeWarning || m.win != nil || m.lose != nil || m.pause {
 			return m, nil
 		}
-
+		if m.gpmStart.IsZero() {
+			m.gpmStart = time.Now()
+		}
 		randomGopher := m.RandomLivingGopher()
 
 		if randomGopher == nil {
 			if m.wave > 9 {
 				m.win = m.selected
+				m.gpmEnd = time.Now()
+				m.gpm = calculateGPM(m.gpmStart, m.gpmEnd, m.pauseDuration, m.killCount)
 				return m, winTransition(&m, time.Second*5)
 			}
 			return m, waveTransition(&m, time.Second*3)
@@ -66,12 +71,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			randomGopher.Y--
 		} else {
 			m.lose = randomGopher
+			m.gpmEnd = time.Now()
+			m.gpm = calculateGPM(m.gpmStart, m.gpmEnd, m.pauseDuration, m.killCount)
 			return m, loseTransition(&m, time.Second*15)
 		}
 
 		if m.selected != nil {
 			if len(m.selected.DisplayWord) == 0 {
 				m.selected.Alive = false
+				m.killCount++
 				m.selected = nil
 			}
 		}
@@ -85,8 +93,11 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if key.Matches(msg, m.keys.Pause) {
 			m.pause = !m.pause
+			m.pauseStart = time.Now()
 
 			if !m.pause {
+				m.pauseEnd = time.Now()
+				m.pauseDuration += m.pauseEnd.Sub(m.pauseStart)
 				return m, moveGophers(time.Millisecond * time.Duration(m.timeMultiplier))
 			}
 			return m, nil
@@ -97,17 +108,20 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if !key.Matches(msg, binding) {
 					continue
 				}
+				m.keypresses++
 				letter := rune('a' + i)
 
 				if slices.Contains(m.gophersFirstChar, letter) && m.selected == nil {
 					selected := &m.gophers[slices.Index(m.gophersFirstChar, letter)]
 					if selected.Alive {
+						m.correctKeypresses++
 						m.selected = selected
 						m.selected.DisplayWord = m.selected.DisplayWord[1:]
 						return m, nil
 					}
 				}
 				if m.selected != nil && len(m.selected.DisplayWord) > 0 && m.selected.DisplayWordRunes()[0] == letter {
+					m.correctKeypresses++
 					m.selected.DisplayWord = m.selected.DisplayWord[1:]
 					return m, nil
 				}
@@ -171,4 +185,13 @@ func (m *model) pickUniqueWords(n int) []string {
 		}
 	}
 	return words
+}
+
+func calculateGPM(start, end time.Time, pauseDuration time.Duration, kills int) string {
+	minutes := (end.Sub(start) - pauseDuration).Minutes()
+	if minutes == 0 {
+		return "0"
+	}
+	gpm := float64(kills) / minutes
+	return strconv.Itoa(int(gpm))
 }
