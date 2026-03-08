@@ -1,6 +1,8 @@
 # gophertyper
 A TUI typing game about gophers
 
+![2026-03-08 00-12-34](https://github.com/user-attachments/assets/5626fa9e-f429-44b9-b409-4edd5b422235)
+
 ## Install
 ### Homebrew
 ```
@@ -16,4 +18,3 @@ sh -c "$(curl -fsSL https://raw.githubusercontent.com/mikegetz/gophertyper/main/
 ```
 sh -c "$(wget -qO- https://raw.githubusercontent.com/mikegetz/gophertyper/main/tools/install.sh)"
 ```
-![2026-03-08 00-12-34](https://github.com/user-attachments/assets/5626fa9e-f429-44b9-b409-4edd5b422235)
