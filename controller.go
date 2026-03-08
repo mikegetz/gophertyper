@@ -10,7 +10,10 @@ import (
 )
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	m.timeMultiplier = (70 - m.wave) + ((10 - m.LivingGopherCount()) * 15)
+	waveMultiplier := 70 - m.wave
+	livingGopherMultiplier := (10 - m.LivingGopherCount()) * 15
+	terminalHeightMultiplier := (m.height - m.topPadding) * 5
+	m.timeMultiplier = waveMultiplier + livingGopherMultiplier + terminalHeightMultiplier
 	switch msg := msg.(type) {
 
 	case tea.WindowSizeMsg:
