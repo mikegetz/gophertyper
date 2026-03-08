@@ -16,7 +16,7 @@ var (
 	gopherHoleSelectedStyle   = lipgloss.NewStyle().Background(lipgloss.Color("#422400")).Foreground(lipgloss.Color("#d2d201")).Bold(true)
 	skyStyle                  = lipgloss.NewStyle().Background(lipgloss.Color("#87a8eb")).Foreground(lipgloss.Black)
 	grassySkyStyle            = lipgloss.NewStyle().Background(lipgloss.Color("#009600")).Foreground(lipgloss.Color("#014a01"))
-	grassyGroundStyle         = lipgloss.NewStyle().Background(lipgloss.Color("#714209")).Foreground(lipgloss.Color("#228B22"))
+	grassyGroundStyle         = lipgloss.NewStyle().Background(lipgloss.Color("#4e2a00")).Foreground(lipgloss.Color("#228B22"))
 	gopherHoleUnselectedStyle = lipgloss.NewStyle().Background(lipgloss.Color("#4e2a00"))
 )
 
@@ -47,12 +47,18 @@ func (m model) printSky() string {
 	grassyGroundRepeats := (m.width / len(grassyGround)) + 1
 
 	screen += skyStyle.Width(m.width).Render("[Esc] quit    [Space] pause/resume") + "\n"
+	//screen += skyStyle.Width(m.width).Render("version: "+Version) + "\n"
 	sky := skyStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
 	var horizon string
 	if m.lose != nil {
 		horizon = grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", m.lose.X)+gopherHoleUnselectedStyle.Render("🐹")) + "\n"
 	} else {
-		horizon = grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
+		padding := m.width - lipgloss.Width(Version)
+		if padding < 0 {
+			padding = 0
+		}
+
+		horizon = grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", padding)+Version) + "\n"
 	}
 	for i := 1; i < m.topPadding-4; i++ {
 		if m.lose != nil && i == m.topPadding-5 {
