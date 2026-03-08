@@ -11,6 +11,7 @@ import (
 )
 
 const minTerminalWidth = 100
+const minTerminalHeight = 50
 
 //go:embed words/easy.txt
 var easyWords string
@@ -79,10 +80,11 @@ type model struct {
 	selected         *gopher
 
 	// terminal dimensions
-	width         int
-	height        int
-	topPadding    int
-	resizeWarning bool
+	width               int
+	height              int
+	topPadding          int
+	resizeWidthWarning  bool
+	resizeHeightWarning bool
 
 	// stats
 	correctKeypresses int

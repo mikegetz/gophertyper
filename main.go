@@ -7,7 +7,7 @@ import (
 	tea "charm.land/bubbletea/v2"
 )
 
-var Version = "dev"
+var Version = "for_a_js_dev"
 
 func main() {
 	p := tea.NewProgram(initialModel())

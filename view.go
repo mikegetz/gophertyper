@@ -10,6 +10,7 @@ import (
 )
 
 var (
+	gameContainerStyle        = lipgloss.NewStyle().Height(minTerminalHeight)
 	containerStyle            = lipgloss.NewStyle().Background(lipgloss.Color("#714209"))
 	transitionContainerStyle  = lipgloss.NewStyle().Background(lipgloss.Color("#422400"))
 	waveTransitionTextStyle   = lipgloss.NewStyle().Background(lipgloss.Color("#422400")).Foreground(lipgloss.Color("#d2d201")).Bold(true)
@@ -24,7 +25,7 @@ func (m model) View() tea.View {
 	screen := ""
 	screen += m.printSky()
 
-	if m.resizeWarning {
+	if m.resizeWidthWarning || m.resizeHeightWarning {
 		screen += m.printResizeWarning()
 	} else if m.waveTransition {
 		screen += m.printWaveTransition()
@@ -99,7 +100,7 @@ func (m model) printReport() string {
 
 func (m model) printLoseTransition(loseVerticalPadding int) string {
 	screen := ""
-	gameViewSize := m.height - m.topPadding
+	gameViewSize := minTerminalHeight - m.topPadding
 
 	screen += waveTransitionTextStyle.Width(m.width).Align(lipgloss.Center).Render(m.printReport()) + "\n"
 
@@ -113,7 +114,7 @@ func (m model) printLoseTransition(loseVerticalPadding int) string {
 func (m model) printWinTransition() string {
 	screen := ""
 	winVerticalPadding := 4
-	gameViewSize := m.height - m.topPadding
+	gameViewSize := minTerminalHeight - m.topPadding
 
 	for y := 0; y < winVerticalPadding; y++ {
 		screen += transitionContainerStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
@@ -133,14 +134,21 @@ func (m model) printWinTransition() string {
 func (m model) printResizeWarning() string {
 	screen := ""
 	verticalPadding := 4
-	gameViewSize := m.height - m.topPadding
+	gameViewSize := minTerminalHeight - m.topPadding
 
 	for y := 0; y < verticalPadding; y++ {
 		screen += containerStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
 	}
 
-	warning := "RESIZE TERMINAL to Minimum Width: " + fmt.Sprint(minTerminalWidth)
-	screen += containerStyle.Width(m.width).Align(lipgloss.Center).Render(warning) + "\n"
+	if m.resizeWidthWarning {
+		warning := "RESIZE TERMINAL to Minimum Width: " + fmt.Sprint(minTerminalWidth)
+		screen += containerStyle.Width(m.width).Align(lipgloss.Center).Render(warning) + "\n"
+	}
+
+	if m.resizeHeightWarning {
+		warning := "RESIZE TERMINAL to Minimum Height: " + fmt.Sprint(minTerminalHeight)
+		screen += containerStyle.Width(m.width).Align(lipgloss.Center).Render(warning) + "\n"
+	}
 
 	for y := 0; y < (gameViewSize - (verticalPadding + 1)); y++ {
 		screen += containerStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
@@ -152,7 +160,7 @@ func (m model) printResizeWarning() string {
 func (m model) printWaveTransition() string {
 	screen := ""
 	verticalPadding := 4
-	gameViewSize := m.height - m.topPadding
+	gameViewSize := minTerminalHeight - m.topPadding
 
 	for y := 0; y < verticalPadding; y++ {
 		screen += transitionContainerStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
@@ -185,7 +193,7 @@ func concatArt(left, right string) string {
 }
 
 func (m model) printGophers(truncate int) string {
-	gameViewSize := m.height - m.topPadding
+	gameViewSize := minTerminalHeight - m.topPadding
 
 	if truncate > 0 {
 		gameViewSize = truncate

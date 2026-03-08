@@ -13,27 +13,27 @@ import (
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	waveMultiplier := 50 - m.wave
 	livingGopherMultiplier := (10 - m.LivingGopherCount()) * 15
-	terminalHeightMultiplier := func() int {
-		if m.height > 40 {
-			return 0
-		}
-		return (m.height - m.topPadding) * 5
-	}()
-	m.timeMultiplier = waveMultiplier + livingGopherMultiplier + terminalHeightMultiplier
+	m.timeMultiplier = waveMultiplier + livingGopherMultiplier
 	switch msg := msg.(type) {
 
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
 		if msg.Width < minTerminalWidth {
-			m.resizeWarning = true
-			return m, nil
-		} else if m.resizeWarning {
-			m.resizeWarning = false
+			m.resizeWidthWarning = true
+		} else if m.resizeWidthWarning {
+			m.resizeWidthWarning = false
 			return m, moveGophers(time.Millisecond * time.Duration(m.timeMultiplier))
-		} else {
-			return m, nil
 		}
+
+		if msg.Height < minTerminalHeight {
+			m.resizeHeightWarning = true
+		} else if m.resizeHeightWarning {
+			m.resizeHeightWarning = false
+			return m, moveGophers(time.Millisecond * time.Duration(m.timeMultiplier))
+		}
+
+		return m, nil
 
 	case winTransitionMsg:
 		return m, tea.Quit
@@ -51,7 +51,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		return m, moveGophers(time.Millisecond * time.Duration(m.timeMultiplier))
 
 	case tickMsg:
-		if m.resizeWarning || m.win != nil || m.lose != nil || m.pause {
+		if m.resizeWidthWarning || m.resizeHeightWarning || m.win != nil || m.lose != nil || m.pause {
 			return m, nil
 		}
 		if m.gpmStart.IsZero() {
@@ -106,7 +106,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
-		if m.win == nil && m.lose == nil && !m.resizeWarning && !m.pause {
+		if m.win == nil && m.lose == nil && !m.resizeWidthWarning && !m.pause {
 			for i, binding := range m.keys.Letters {
 				if !key.Matches(msg, binding) {
 					continue
@@ -155,7 +155,7 @@ func (m *model) initGophers() {
 			segmentMargin := 1                                                     // columns reserved on each side to prevent adjacency
 			usableWidth := segmentWidth - (segmentMargin * 2)                      // placeable range within the segment after margins
 			gopherSpacing := segmentStart + segmentMargin + rand.IntN(usableWidth) // final X: start + margin + random offset
-			m.gophers = append(m.gophers, gopher{X: gopherSpacing, Y: (m.height - m.topPadding), Word: words[i], DisplayWord: words[i], Alive: true})
+			m.gophers = append(m.gophers, gopher{X: gopherSpacing, Y: (minTerminalHeight - m.topPadding), Word: words[i], DisplayWord: words[i], Alive: true})
 			m.gophersFirstChar = append(m.gophersFirstChar, []rune(words[i])[0])
 		}
 	}
