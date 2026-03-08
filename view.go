@@ -47,6 +47,7 @@ func (m model) printSky() string {
 	grassyGroundRepeats := (m.width / len(grassyGround)) + 1
 
 	screen += skyStyle.Width(m.width).Render("ctrl+c/esc to quit") + "\n"
+	screen += skyStyle.Width(m.width).Render("space to pause") + "\n"
 	sky := skyStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
 	var horizon string
 	if m.lose != nil {

@@ -72,6 +72,7 @@ type model struct {
 	waveTransition   bool
 	winTransition    bool
 	timeMultiplier   int
+	pause            bool
 	lose             *gopher
 	win              *gopher
 	selected         *gopher
@@ -151,6 +152,7 @@ func (g gopher) DisplayWordRunes() []rune {
 
 type keyMap struct {
 	Quit    key.Binding
+	Pause   key.Binding
 	Letters [26]key.Binding
 }
 
@@ -158,6 +160,10 @@ var keys = keyMap{
 	Quit: key.NewBinding(
 		key.WithKeys("ctrl+c", "esc"),
 		key.WithHelp("ctrl+c/esc", "quit"),
+	),
+	Pause: key.NewBinding(
+		key.WithKeys("space"),
+		key.WithHelp("space", "pause"),
 	),
 	Letters: func() [26]key.Binding {
 		var bindings [26]key.Binding
