@@ -28,10 +28,13 @@ func (m model) View() tea.View {
 		screen += m.printResizeWarning()
 	} else if m.waveTransition {
 		screen += m.printWaveTransition()
+	} else if m.loseTransition {
+		screen += m.printGophers(8)
+		screen += m.printLoseTransition(8)
 	} else if m.winTransition {
 		screen += m.printWinTransition()
 	} else {
-		screen += m.printGophers()
+		screen += m.printGophers(0)
 	}
 
 	// add height to m.topPadding to account for the ground and the newlines above
@@ -60,8 +63,9 @@ func (m model) printSky() string {
 
 		horizon = grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", padding)+Version) + "\n"
 	}
-	for i := 1; i < m.topPadding-4; i++ {
-		if m.lose != nil && i == m.topPadding-5 {
+	// 3 accounts for top line controls, horizon, and ground
+	for i := 1; i < m.topPadding-3; i++ {
+		if m.lose != nil && i == m.topPadding-4 {
 			loseText := "you lose to gopher "
 			padding := m.lose.X - len(loseText)
 			if padding < 0 {
@@ -82,6 +86,30 @@ func (m model) printSky() string {
 	return screen
 }
 
+func (m model) printReport() string {
+	correctKeypresses := float64(m.correctKeypresses) / float64(m.keypresses)
+	m.accuracy = fmt.Sprintf("%.2f%%", correctKeypresses*100)
+	report := strings.Repeat("\n", 5)
+	report += "Gophers Per Minute (GPM): " + m.gpm + "\n"
+	report += "Accuracy: " + m.accuracy + "\n"
+	report += "Correct Keypresses: " + fmt.Sprint(m.correctKeypresses) + "/" + fmt.Sprint(m.keypresses) + "\n"
+
+	return report
+}
+
+func (m model) printLoseTransition(loseVerticalPadding int) string {
+	screen := ""
+	gameViewSize := m.height - m.topPadding
+
+	screen += waveTransitionTextStyle.Width(m.width).Align(lipgloss.Center).Render(m.printReport()) + "\n"
+
+	for y := 0; y < gameViewSize-(loseVerticalPadding+lipgloss.Height(m.printReport())); y++ {
+		screen += transitionContainerStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
+	}
+
+	return screen
+}
+
 func (m model) printWinTransition() string {
 	screen := ""
 	winVerticalPadding := 4
@@ -93,7 +121,9 @@ func (m model) printWinTransition() string {
 
 	screen += waveTransitionTextStyle.Width(m.width).Align(lipgloss.Center).Render(winText) + "\n"
 
-	for y := 0; y < gameViewSize-(winVerticalPadding+lipgloss.Height(wave)); y++ {
+	screen += waveTransitionTextStyle.Width(m.width).Align(lipgloss.Center).Render(m.printReport()) + "\n"
+
+	for y := 0; y < gameViewSize-(winVerticalPadding+lipgloss.Height(m.printReport())+lipgloss.Height(wave)); y++ {
 		screen += transitionContainerStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
 	}
 
@@ -154,8 +184,13 @@ func concatArt(left, right string) string {
 	return strings.Join(result, "\n")
 }
 
-func (m model) printGophers() string {
+func (m model) printGophers(truncate int) string {
 	gameViewSize := m.height - m.topPadding
+
+	if truncate > 0 {
+		gameViewSize = truncate
+	}
+
 	screen := ""
 
 	for y := 0; y < gameViewSize; y++ {
