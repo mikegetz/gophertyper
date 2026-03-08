@@ -165,11 +165,11 @@ func (m *model) pickUniqueWords(n int) []string {
 	var wordList []string
 	wordList = append(wordList, easyWordList...)
 
-	if m.wave > 3 {
+	if m.wave > 2 {
 		wordList = append(wordList, mediumWordList...)
 	}
 
-	if m.wave > 7 {
+	if m.wave > 6 {
 		wordList = append(wordList, hardWordList...)
 	}
 
