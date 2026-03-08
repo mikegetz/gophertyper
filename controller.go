@@ -132,7 +132,7 @@ func (m *model) initGophers() {
 
 	if m.height > 0 && len(m.gophers) == 0 {
 		segmentWidth := m.width / gopherCount
-		words := pickUniqueWords(easyWordList, gopherCount)
+		words := m.pickUniqueWords(gopherCount)
 		for i := 0; i < gopherCount; i++ {
 			segmentStart := i * segmentWidth                                       // left edge of this gopher's segment
 			segmentMargin := 1                                                     // columns reserved on each side to prevent adjacency
@@ -144,7 +144,18 @@ func (m *model) initGophers() {
 	}
 }
 
-func pickUniqueWords(wordList []string, n int) []string {
+func (m *model) pickUniqueWords(n int) []string {
+	var wordList []string
+	wordList = append(wordList, easyWordList...)
+
+	if m.wave > 3 {
+		wordList = append(wordList, mediumWordList...)
+	}
+
+	if m.wave > 7 {
+		wordList = append(wordList, hardWordList...)
+	}
+
 	words := make([]string, 0, n)
 	usedLetters := map[byte]bool{}
 	shuffled := rand.Perm(len(wordList))
