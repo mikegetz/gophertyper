@@ -46,6 +46,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.wave++
 		m.clearGophers()
 		m.initGophers()
+		m.pauseEnd = time.Now()
+		m.pauseDuration += m.pauseEnd.Sub(m.pauseStart)
 		return m, moveGophers(time.Millisecond * time.Duration(m.timeMultiplier))
 
 	case tickMsg:
@@ -64,6 +66,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.gpm = calculateGPM(m.gpmStart, m.gpmEnd, m.pauseDuration, m.killCount)
 				return m, winTransition(&m, time.Second*5)
 			}
+			m.pauseStart = time.Now()
 			return m, waveTransition(&m, time.Second*3)
 		}
 
