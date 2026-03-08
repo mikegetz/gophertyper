@@ -87,7 +87,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 					return m, nil
 				}
 			}
-			if m.selected != nil && m.selected.DisplayWordRunes()[0] == letter {
+			if m.selected != nil && len(m.selected.DisplayWord) > 0 && m.selected.DisplayWordRunes()[0] == letter {
 				m.selected.DisplayWord = m.selected.DisplayWord[1:]
 				return m, nil
 			}
