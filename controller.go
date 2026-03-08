@@ -12,7 +12,12 @@ import (
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	waveMultiplier := 70 - m.wave
 	livingGopherMultiplier := (10 - m.LivingGopherCount()) * 15
-	terminalHeightMultiplier := (m.height - m.topPadding) * 5
+	terminalHeightMultiplier := func() int {
+		if m.height > 40 {
+			return 0
+		}
+		return (m.height - m.topPadding) * 5
+	}()
 	m.timeMultiplier = waveMultiplier + livingGopherMultiplier + terminalHeightMultiplier
 	switch msg := msg.(type) {
 
@@ -76,25 +81,27 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 
-		for i, binding := range m.keys.Letters {
-			if !key.Matches(msg, binding) {
-				continue
-			}
-			letter := rune('a' + i)
+		if m.win == nil && m.lose == nil && !m.resizeWarning {
+			for i, binding := range m.keys.Letters {
+				if !key.Matches(msg, binding) {
+					continue
+				}
+				letter := rune('a' + i)
 
-			if slices.Contains(m.gophersFirstChar, letter) && m.selected == nil {
-				selected := &m.gophers[slices.Index(m.gophersFirstChar, letter)]
-				if selected.Alive {
-					m.selected = selected
+				if slices.Contains(m.gophersFirstChar, letter) && m.selected == nil {
+					selected := &m.gophers[slices.Index(m.gophersFirstChar, letter)]
+					if selected.Alive {
+						m.selected = selected
+						m.selected.DisplayWord = m.selected.DisplayWord[1:]
+						return m, nil
+					}
+				}
+				if m.selected != nil && len(m.selected.DisplayWord) > 0 && m.selected.DisplayWordRunes()[0] == letter {
 					m.selected.DisplayWord = m.selected.DisplayWord[1:]
 					return m, nil
 				}
+				break
 			}
-			if m.selected != nil && len(m.selected.DisplayWord) > 0 && m.selected.DisplayWordRunes()[0] == letter {
-				m.selected.DisplayWord = m.selected.DisplayWord[1:]
-				return m, nil
-			}
-			break
 		}
 	}
 
