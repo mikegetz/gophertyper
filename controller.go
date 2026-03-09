@@ -154,6 +154,7 @@ func (m *model) initGophers() {
 	if m.height > 0 && len(m.gophers) == 0 {
 		segmentWidth := m.width / gopherCount
 		words := m.pickUniqueWords(gopherCount)
+		m.usedWords = append(m.usedWords, words...)
 		for i := 0; i < gopherCount; i++ {
 			segmentStart := i * segmentWidth                                       // left edge of this gopher's segment
 			segmentMargin := 1                                                     // columns reserved on each side to prevent adjacency
@@ -185,6 +186,18 @@ func (m *model) pickUniqueWords(n int) []string {
 		if len(w) == 0 || usedLetters[w[0]] {
 			continue
 		}
+
+		alreadyUsed := false
+		for _, uw := range m.usedWords {
+			if w == uw {
+				alreadyUsed = true
+				break
+			}
+		}
+		if alreadyUsed {
+			continue
+		}
+
 		usedLetters[w[0]] = true
 		words = append(words, w)
 		if len(words) == n {

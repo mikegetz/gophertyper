@@ -68,6 +68,7 @@ var (
 type model struct {
 	gophers          []gopher
 	gophersFirstChar []rune
+	usedWords        []string
 	wave             int
 	waveTransition   bool
 	winTransition    bool
