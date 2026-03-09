@@ -89,6 +89,7 @@ type model struct {
 	keypresses        int
 	killCount         int
 	gpm               string
+	wpm               string
 	gpmStart          time.Time
 	gpmEnd            time.Time
 	pauseStart        time.Time
@@ -111,6 +112,7 @@ func initialModel() model {
 		killCount:         0,
 		correctKeypresses: 0,
 		gpm:               "0",
+		wpm:               "0",
 		accuracy:          "0%",
 		keypresses:        0,
 	}

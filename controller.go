@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"math/rand/v2"
 	"slices"
 	"strconv"
@@ -57,6 +58,15 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		if m.gpmStart.IsZero() {
 			m.gpmStart = time.Now()
 		}
+
+		if m.selected != nil {
+			if len(m.selected.DisplayWord) == 0 {
+				m.selected.Alive = false
+				m.killCount++
+				m.selected = nil
+			}
+		}
+
 		randomGopher := m.RandomLivingGopher()
 
 		if randomGopher == nil {
@@ -64,6 +74,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.win = m.selected
 				m.gpmEnd = time.Now()
 				m.gpm = calculateGPM(m.gpmStart, m.gpmEnd, m.pauseDuration, m.killCount)
+				m.wpm = calculateWPM(m.gpmStart, m.gpmEnd, m.pauseDuration, m.correctKeypresses, m.killCount)
 				return m, winTransition(&m, time.Second*5)
 			}
 			m.pauseStart = time.Now()
@@ -76,15 +87,8 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.lose = randomGopher
 			m.gpmEnd = time.Now()
 			m.gpm = calculateGPM(m.gpmStart, m.gpmEnd, m.pauseDuration, m.killCount)
+			m.wpm = calculateWPM(m.gpmStart, m.gpmEnd, m.pauseDuration, m.correctKeypresses, m.killCount)
 			return m, loseTransition(&m, time.Second*15)
-		}
-
-		if m.selected != nil {
-			if len(m.selected.DisplayWord) == 0 {
-				m.selected.Alive = false
-				m.killCount++
-				m.selected = nil
-			}
 		}
 
 		return m, moveGophers(time.Millisecond * time.Duration(m.timeMultiplier))
@@ -96,13 +100,13 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 		if key.Matches(msg, m.keys.Pause) {
 			m.pause = !m.pause
-			m.pauseStart = time.Now()
 
 			if !m.pause {
 				m.pauseEnd = time.Now()
 				m.pauseDuration += m.pauseEnd.Sub(m.pauseStart)
 				return m, moveGophers(time.Millisecond * time.Duration(m.timeMultiplier))
 			}
+			m.pauseStart = time.Now()
 			return m, nil
 		}
 
@@ -197,4 +201,13 @@ func calculateGPM(start, end time.Time, pauseDuration time.Duration, kills int) 
 	}
 	gpm := float64(kills) / minutes
 	return strconv.Itoa(int(gpm))
+}
+
+func calculateWPM(start, end time.Time, pauseDuration time.Duration, correctChars int, completedWords int) string {
+	minutes := (end.Sub(start) - pauseDuration).Minutes()
+	if minutes == 0 {
+		return "0"
+	}
+	wpm := float64(correctChars+completedWords) / 5.0 / minutes
+	return fmt.Sprintf("%.0f", wpm)
 }

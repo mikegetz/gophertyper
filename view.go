@@ -91,6 +91,7 @@ func (m model) printReport() string {
 	m.accuracy = fmt.Sprintf("%.2f%%", correctKeypresses*100)
 	report := strings.Repeat("\n", 5)
 	report += "Gophers Per Minute (GPM): " + m.gpm + "\n"
+	report += "Words Per Minute (WPM): " + m.wpm + "\n"
 	report += "Accuracy: " + m.accuracy + "\n"
 	report += "Correct Keypresses: " + fmt.Sprint(m.correctKeypresses) + "/" + fmt.Sprint(m.keypresses) + "\n"
 
