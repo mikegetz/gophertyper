@@ -114,13 +114,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 
 		if key.Matches(msg, m.keys.Reset) {
-			m.wave = 0
-			m.userTimeMultiplier = 0
-			m.correctKeypresses = 0
-			m.keypresses = 0
-			m.killCount = 0
-			m.clearGophers()
-			m.initGophers()
+			m.reset()
 			return m, nil
 		}
 
@@ -168,12 +162,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.initGophers()
 
 	return m, nil
-}
-
-func (m *model) clearGophers() {
-	m.gophers = make([]gopher, 0)
-	m.gophersFirstChar = make([]rune, 0)
-	m.selected = nil
 }
 
 func calculateGPM(start, end time.Time, pauseDuration time.Duration, kills int) string {

@@ -271,6 +271,22 @@ func moveGophers(d time.Duration) tea.Cmd {
 	})
 }
 
+func (m *model) reset() {
+	m.wave = 0
+	m.userTimeMultiplier = 0
+	m.correctKeypresses = 0
+	m.keypresses = 0
+	m.killCount = 0
+	m.clearGophers()
+	m.initGophers()
+}
+
+func (m *model) clearGophers() {
+	m.gophers = make([]gopher, 0)
+	m.gophersFirstChar = make([]rune, 0)
+	m.selected = nil
+}
+
 func (m *model) initGophers() {
 	gopherCount := 10
 
@@ -291,7 +307,10 @@ func (m *model) initGophers() {
 
 func (m *model) pickUniqueWords(n int) []string {
 	var wordList []string
-	wordList = append(wordList, easyWordList...)
+
+	if m.wave < 5 {
+		wordList = append(wordList, easyWordList...)
+	}
 
 	if m.wave > 2 {
 		wordList = append(wordList, mediumWordList...)
