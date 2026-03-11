@@ -54,18 +54,24 @@ func (m model) printSky() string {
 	m.help.SetWidth(m.width)
 	m.help.Styles = help.DefaultStyles(m.isDark)
 	helpView := m.help.View(m.keys)
+
+	userCurrentSpeed := ""
+	if m.userTimeMultiplier != 0 {
+		userCurrentSpeed = fmt.Sprintf("Speed: %d", -m.userTimeMultiplier)
+	}
+
 	screen += helpView + "\n"
 
 	var horizon string
 	if m.lose != nil {
 		horizon = grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", m.lose.X)+gopherHoleUnselectedStyle.Render("🐹")) + "\n"
 	} else {
-		padding := m.width - lipgloss.Width(Version)
+		padding := m.width - lipgloss.Width(Version+userCurrentSpeed)
 		if padding < 0 {
 			padding = 0
 		}
 
-		horizon = grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", padding)+Version) + "\n"
+		horizon = grassySkyStyle.Width(m.width).Render(userCurrentSpeed+strings.Repeat(" ", padding)+Version) + "\n"
 	}
 
 	// 2 accounts for horizon, and ground
