@@ -113,6 +113,17 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
+		if key.Matches(msg, m.keys.Reset) {
+			m.wave = 0
+			m.userTimeMultiplier = 0
+			m.correctKeypresses = 0
+			m.keypresses = 0
+			m.killCount = 0
+			m.clearGophers()
+			m.initGophers()
+			return m, nil
+		}
+
 		if key.Matches(msg, m.keys.Up) {
 			if m.userTimeMultiplier > -50 {
 				m.userTimeMultiplier -= 10

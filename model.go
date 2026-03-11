@@ -189,19 +189,20 @@ type keyMap struct {
 	Pause   key.Binding
 	Up      key.Binding
 	Down    key.Binding
+	Reset   key.Binding
 	Letters [26]key.Binding
 }
 
 // ShortHelp returns keybindings to be shown in the mini help view. It's part
 // of the key.Map interface.
 func (k keyMap) ShortHelp() []key.Binding {
-	return []key.Binding{k.Quit, k.Pause, k.Up, k.Down}
+	return []key.Binding{k.Quit, k.Pause, k.Up, k.Down, k.Reset}
 }
 
 // FullHelp returns keybindings for the expanded help view. It's part of the
 // key.Map interface.
 func (k keyMap) FullHelp() [][]key.Binding {
-	return [][]key.Binding{{k.Quit, k.Pause, k.Up, k.Down}}
+	return [][]key.Binding{{k.Quit, k.Pause, k.Up, k.Down, k.Reset}}
 }
 
 var keys = keyMap{
@@ -220,6 +221,10 @@ var keys = keyMap{
 	Down: key.NewBinding(
 		key.WithKeys("down"),
 		key.WithHelp("↓", "decrease speed"),
+	),
+	Reset: key.NewBinding(
+		key.WithKeys("ctrl+r"),
+		key.WithHelp("ctrl+r", "reset"),
 	),
 	Letters: func() [26]key.Binding {
 		var bindings [26]key.Binding
