@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"math/rand/v2"
+	"slices"
 	"strings"
 	"time"
 
@@ -329,13 +330,7 @@ func (m *model) pickUniqueWords(n int) []string {
 			continue
 		}
 
-		alreadyUsed := false
-		for _, uw := range m.usedWords {
-			if w == uw {
-				alreadyUsed = true
-				break
-			}
-		}
+		alreadyUsed := slices.Contains(m.usedWords, w)
 		if alreadyUsed {
 			continue
 		}

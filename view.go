@@ -66,10 +66,7 @@ func (m model) printSky() string {
 	if m.lose != nil {
 		horizon = grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", m.lose.X)+gopherHoleUnselectedStyle.Render("🐹")) + "\n"
 	} else {
-		padding := m.width - lipgloss.Width(Version+userCurrentSpeed)
-		if padding < 0 {
-			padding = 0
-		}
+		padding := max(m.width-lipgloss.Width(Version+userCurrentSpeed), 0)
 
 		horizon = grassySkyStyle.Width(m.width).Render(userCurrentSpeed+strings.Repeat(" ", padding)+Version) + "\n"
 	}
@@ -78,10 +75,7 @@ func (m model) printSky() string {
 	for i := 1; i < m.topPadding-(lipgloss.Height(helpView)+2); i++ {
 		if m.lose != nil && i == m.topPadding-4 {
 			loseText := "you lose to gopher "
-			padding := m.lose.X - len(loseText)
-			if padding < 0 {
-				padding = 0
-			}
+			padding := max(m.lose.X-len(loseText), 0)
 			screen += skyStyle.Width(m.width).Render(strings.Repeat(" ", padding)+loseText+m.lose.Word) + "\n"
 		} else {
 			screen += sky
@@ -246,11 +240,7 @@ func (m model) printGophers(truncate int) string {
 					}
 				}
 
-				padding := sortedGopher.X - lineOffset
-
-				if padding < 0 {
-					padding = 0
-				}
+				padding := max(sortedGopher.X-lineOffset, 0)
 
 				line += containerStyle.Render(strings.Repeat(" ", padding) + renderObject)
 				lineOffset += padding + lipgloss.Width(renderObject)
