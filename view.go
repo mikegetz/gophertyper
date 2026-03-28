@@ -39,7 +39,7 @@ func (m model) View() tea.View {
 	}
 
 	// add height to m.topPadding to account for the ground and the newlines above
-	//screen += m.debugView()
+	// screen += m.debugView()
 
 	teaView := tea.NewView(screen)
 	return teaView
@@ -257,10 +257,10 @@ func (m model) printGophers(truncate int) string {
 func (m model) debugView() string {
 	debug := "[DEBUG]"
 
-	//debug += fmt.Sprintf("Terminal Size: %d x %d", m.width, m.height)
-	//debug += " Gophers: " + fmt.Sprint(m.gophers)
-	//debug += fmt.Sprintf(" lose: %v", m.lose)
-	//debug += fmt.Sprintf(" timeMultiplier: %d", m.timeMultiplier)
-	debug += fmt.Sprintf(" userTimeMultiplier: %d", m.userTimeMultiplier)
+	// debug += fmt.Sprintf("Terminal Size: %d x %d", m.width, m.height)
+	// debug += " Gophers: " + fmt.Sprint(m.gophers)
+	// debug += fmt.Sprintf(" lose: %v", m.lose)
+	// debug += fmt.Sprintf(" timeMultiplier: %d", m.timeMultiplier)
+	// debug += fmt.Sprintf(" userTimeMultiplier: %d", m.userTimeMultiplier)
 	return debug
 }
