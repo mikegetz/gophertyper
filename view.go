@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 
+	"charm.land/bubbles/v2/help"
 	tea "charm.land/bubbletea/v2"
 	"charm.land/lipgloss/v2"
 )
@@ -38,7 +39,7 @@ func (m model) View() tea.View {
 	}
 
 	// add height to m.topPadding to account for the ground and the newlines above
-	//screen += m.debugView()
+	// screen += m.debugView()
 
 	teaView := tea.NewView(screen)
 	return teaView
@@ -46,31 +47,35 @@ func (m model) View() tea.View {
 
 func (m model) printSky() string {
 	screen := ""
+	sky := skyStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
 	grassyGround := "~~^~^~^~~^~~^~*~^~^~~^~^~~^~"
 	grassyGroundRepeats := (m.width / len(grassyGround)) + 1
 
-	screen += skyStyle.Width(m.width).Render("[Esc] quit    [Space] pause/resume") + "\n"
-	//screen += skyStyle.Width(m.width).Render("version: "+Version) + "\n"
-	sky := skyStyle.Width(m.width).Render(strings.Repeat(" ", m.width)) + "\n"
+	m.help.SetWidth(m.width)
+	m.help.Styles = help.DefaultStyles(m.isDark)
+	helpView := m.help.View(m.keys)
+
+	userCurrentSpeed := ""
+	if m.userTimeMultiplier != 0 {
+		userCurrentSpeed = fmt.Sprintf("Speed: %d", -m.userTimeMultiplier)
+	}
+
+	screen += helpView + "\n"
+
 	var horizon string
 	if m.lose != nil {
 		horizon = grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", m.lose.X)+gopherHoleUnselectedStyle.Render("🐹")) + "\n"
 	} else {
-		padding := m.width - lipgloss.Width(Version)
-		if padding < 0 {
-			padding = 0
-		}
+		padding := max(m.width-lipgloss.Width(Version+userCurrentSpeed), 0)
 
-		horizon = grassySkyStyle.Width(m.width).Render(strings.Repeat(" ", padding)+Version) + "\n"
+		horizon = grassySkyStyle.Width(m.width).Render(userCurrentSpeed+strings.Repeat(" ", padding)+Version) + "\n"
 	}
-	// 3 accounts for top line controls, horizon, and ground
-	for i := 1; i < m.topPadding-3; i++ {
+
+	// 2 accounts for horizon, and ground
+	for i := 1; i < m.topPadding-(lipgloss.Height(helpView)+2); i++ {
 		if m.lose != nil && i == m.topPadding-4 {
 			loseText := "you lose to gopher "
-			padding := m.lose.X - len(loseText)
-			if padding < 0 {
-				padding = 0
-			}
+			padding := max(m.lose.X-len(loseText), 0)
 			screen += skyStyle.Width(m.width).Render(strings.Repeat(" ", padding)+loseText+m.lose.Word) + "\n"
 		} else {
 			screen += sky
@@ -235,11 +240,7 @@ func (m model) printGophers(truncate int) string {
 					}
 				}
 
-				padding := sortedGopher.X - lineOffset
-
-				if padding < 0 {
-					padding = 0
-				}
+				padding := max(sortedGopher.X-lineOffset, 0)
 
 				line += containerStyle.Render(strings.Repeat(" ", padding) + renderObject)
 				lineOffset += padding + lipgloss.Width(renderObject)
@@ -256,9 +257,10 @@ func (m model) printGophers(truncate int) string {
 func (m model) debugView() string {
 	debug := "[DEBUG]"
 
-	//debug += fmt.Sprintf("Terminal Size: %d x %d", m.width, m.height)
-	//debug += " Gophers: " + fmt.Sprint(m.gophers)
-	//debug += fmt.Sprintf(" lose: %v", m.lose)
-	//debug += fmt.Sprintf(" timeMultiplier: %d", m.timeMultiplier)
+	// debug += fmt.Sprintf("Terminal Size: %d x %d", m.width, m.height)
+	// debug += " Gophers: " + fmt.Sprint(m.gophers)
+	// debug += fmt.Sprintf(" lose: %v", m.lose)
+	// debug += fmt.Sprintf(" timeMultiplier: %d", m.timeMultiplier)
+	// debug += fmt.Sprintf(" userTimeMultiplier: %d", m.userTimeMultiplier)
 	return debug
 }

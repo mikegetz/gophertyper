@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"math/rand/v2"
 	"slices"
 	"strconv"
 	"time"
@@ -13,15 +12,19 @@ import (
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	waveMultiplier := 50 - m.wave
-	livingGopherMultiplier := (10 - m.LivingGopherCount()) * 15
+	livingGopherMultiplier := (10 - m.livingGopherCount()) * 15
 	terminalHeightMultiplier := func() int {
 		if m.height > 40 {
 			return 0
 		}
 		return (m.height - m.topPadding) * 5
 	}()
-	m.timeMultiplier = waveMultiplier + livingGopherMultiplier + terminalHeightMultiplier
+	m.timeMultiplier = waveMultiplier + livingGopherMultiplier + terminalHeightMultiplier + m.userTimeMultiplier
+
 	switch msg := msg.(type) {
+
+	case tea.BackgroundColorMsg:
+		m.isDark = msg.IsDark()
 
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
@@ -67,7 +70,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		}
 
-		randomGopher := m.RandomLivingGopher()
+		randomGopher := m.randomLivingGopher()
 
 		if randomGopher == nil {
 			if m.wave > 9 {
@@ -110,6 +113,25 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, nil
 		}
 
+		if key.Matches(msg, m.keys.Reset) {
+			m.reset()
+			return m, nil
+		}
+
+		if key.Matches(msg, m.keys.Up) {
+			if m.userTimeMultiplier > -50 {
+				m.userTimeMultiplier -= 10
+			}
+			return m, nil
+		}
+
+		if key.Matches(msg, m.keys.Down) {
+			if m.userTimeMultiplier < 50 {
+				m.userTimeMultiplier += 10
+			}
+			return m, nil
+		}
+
 		if m.win == nil && m.lose == nil && !m.resizeWarning && !m.pause {
 			for i, binding := range m.keys.Letters {
 				if !key.Matches(msg, binding) {
@@ -140,71 +162,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	m.initGophers()
 
 	return m, nil
-}
-
-func (m *model) clearGophers() {
-	m.gophers = make([]gopher, 0)
-	m.gophersFirstChar = make([]rune, 0)
-	m.selected = nil
-}
-
-func (m *model) initGophers() {
-	gopherCount := 10
-
-	if m.height > 0 && len(m.gophers) == 0 {
-		segmentWidth := m.width / gopherCount
-		words := m.pickUniqueWords(gopherCount)
-		m.usedWords = append(m.usedWords, words...)
-		for i := 0; i < gopherCount; i++ {
-			segmentStart := i * segmentWidth                                       // left edge of this gopher's segment
-			segmentMargin := 1                                                     // columns reserved on each side to prevent adjacency
-			usableWidth := segmentWidth - (segmentMargin * 2)                      // placeable range within the segment after margins
-			gopherSpacing := segmentStart + segmentMargin + rand.IntN(usableWidth) // final X: start + margin + random offset
-			m.gophers = append(m.gophers, gopher{X: gopherSpacing, Y: (m.height - m.topPadding), Word: words[i], DisplayWord: words[i], Alive: true})
-			m.gophersFirstChar = append(m.gophersFirstChar, []rune(words[i])[0])
-		}
-	}
-}
-
-func (m *model) pickUniqueWords(n int) []string {
-	var wordList []string
-	wordList = append(wordList, easyWordList...)
-
-	if m.wave > 2 {
-		wordList = append(wordList, mediumWordList...)
-	}
-
-	if m.wave > 6 {
-		wordList = append(wordList, hardWordList...)
-	}
-
-	words := make([]string, 0, n)
-	usedLetters := map[byte]bool{}
-	shuffled := rand.Perm(len(wordList))
-	for _, idx := range shuffled {
-		w := wordList[idx]
-		if len(w) == 0 || usedLetters[w[0]] {
-			continue
-		}
-
-		alreadyUsed := false
-		for _, uw := range m.usedWords {
-			if w == uw {
-				alreadyUsed = true
-				break
-			}
-		}
-		if alreadyUsed {
-			continue
-		}
-
-		usedLetters[w[0]] = true
-		words = append(words, w)
-		if len(words) == n {
-			break
-		}
-	}
-	return words
 }
 
 func calculateGPM(start, end time.Time, pauseDuration time.Duration, kills int) string {
